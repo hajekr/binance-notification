@@ -10,7 +10,7 @@ from bs4 import BeautifulSoup
 from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
 
-logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
+logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
 
 
 def notify_slack(notification_text):
@@ -38,10 +38,9 @@ def notify_listing(relative_url):
     publication_time_string = soup.find("div", {"class": "css-17s7mnd"}).contents[0]
 
     publication_time = datetime.strptime(publication_time_string, '%Y-%m-%d %H:%M').replace(tzinfo=pytz.UTC)
-    previous_run_time = datetime.now(timezone.utc) - timedelta(hours=0, minutes=10)
+    previous_run_time = datetime.now(timezone.utc) - timedelta(hours=0, minutes=12)
 
-    # if publication_time > previous_run_time:
-    if 1 == 1:
+    if publication_time > previous_run_time:
         message = '*' + page_header + '* \n' + absolute_url
 
         logging.info('Notify ' + message)
