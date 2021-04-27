@@ -40,7 +40,8 @@ def notify_listing(relative_url):
     publication_time = datetime.strptime(publication_time_string, '%Y-%m-%d %H:%M').replace(tzinfo=pytz.UTC)
     previous_run_time = datetime.now(timezone.utc) - timedelta(hours=0, minutes=10)
 
-    if publication_time > previous_run_time:
+    # if publication_time > previous_run_time:
+    if 1 == 1:
         message = '*' + page_header + '* \n' + absolute_url
 
         logging.info('Notify ' + message)
