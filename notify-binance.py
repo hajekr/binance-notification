@@ -38,7 +38,7 @@ def notify_listing(relative_url):
     publication_time_string = soup.find("div", {"class": "css-17s7mnd"}).contents[0]
 
     publication_time = datetime.strptime(publication_time_string, '%Y-%m-%d %H:%M').replace(tzinfo=pytz.UTC)
-    previous_run_time = datetime.now(timezone.utc) - timedelta(hours=0, minutes=12)
+    previous_run_time = datetime.now(timezone.utc) - timedelta(hours=0, minutes=10)
 
     if publication_time > previous_run_time:
         message = '*' + page_header + '* \n' + absolute_url
