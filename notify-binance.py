@@ -13,7 +13,7 @@ db_connection = psycopg2.connect(os.environ.get("DATABASE_URL"))
 
 def create_table_if_not_exists():
     cursor = db_connection.cursor()
-    cursor.execute('CREATE TABLE IF NOT EXISTS listings(url CHAR(255) PRIMARY KEY NOT NULL);')
+    cursor.execute('CREATE TABLE IF NOT EXISTS listings(id SERIAL PRIMARY KEY, url CHAR(255) NOT NULL, title CHAR(255) NOT NULL);')
     logging.info('Table created successfully')
     db_connection.commit()
 
@@ -53,7 +53,7 @@ def notify_listing(relative_url):
         logging.info('Action: NOTIFY')
         notify_slack(message)
 
-        cursor.execute('INSERT INTO listings(url) VALUES (\'' + absolute_url + '\')')
+        cursor.execute('INSERT INTO listings(url, title) VALUES (\'' + absolute_url + '\',\'' + page_header + '\')')
     else:
         logging.info('Action: SKIP')
 
