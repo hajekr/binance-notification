@@ -1,16 +1,21 @@
 import logging
 import os
-from _datetime import datetime
-from _datetime import timedelta
-from _datetime import timezone
 
-import pytz
+import psycopg2
 import requests
 from bs4 import BeautifulSoup
 from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
 
 logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
+db_connection = psycopg2.connect(os.environ.get("DATABASE_URL"))
+
+
+def create_table_if_not_exists():
+    cursor = db_connection.cursor()
+    cursor.execute('CREATE TABLE IF NOT EXISTS listings(url CHAR(255) PRIMARY KEY NOT NULL);')
+    logging.info('Table created successfully')
+    db_connection.commit()
 
 
 def notify_slack(notification_text):
@@ -30,23 +35,30 @@ def notify_slack(notification_text):
 
 def notify_listing(relative_url):
     absolute_url = 'https://www.binance.com' + relative_url;
+    logging.info('Page url ' + absolute_url)
 
     listing_detail_page = requests.get(absolute_url)
     soup = BeautifulSoup(listing_detail_page.content, 'html.parser')
 
     page_header = soup.find("div", {"class": "css-kxziuu"}).contents[0]
-    publication_time_string = soup.find("div", {"class": "css-17s7mnd"}).contents[0]
+    logging.info('Page header ' + page_header)
 
-    publication_time = datetime.strptime(publication_time_string, '%Y-%m-%d %H:%M').replace(tzinfo=pytz.UTC)
-    previous_run_time = datetime.now(timezone.utc) - timedelta(hours=0, minutes=10)
+    cursor = db_connection.cursor()
+    cursor.execute('SELECT url FROM listings WHERE url = \'' + absolute_url + '\'')
+    data = cursor.fetchall()
 
-    if publication_time > previous_run_time:
+    if len(data) == 0:
         message = '*' + page_header + '* \n' + absolute_url
 
-        logging.info('Notify ' + message)
+        logging.info('Action: NOTIFY')
         notify_slack(message)
+
+        cursor.execute('INSERT INTO listings(url) VALUES (\'' + absolute_url + '\')')
     else:
-        logging.info('Skipping message from ' + publication_time_string)
+        logging.info('Action: SKIP')
+
+    db_connection.commit()
+    logging.info(' --- ')
 
 
 def notify_new_listings():
@@ -59,4 +71,7 @@ def notify_new_listings():
         notify_listing(listing['href'])
 
 
+create_table_if_not_exists()
 notify_new_listings()
+
+db_connection.close()
