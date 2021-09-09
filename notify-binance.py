@@ -40,7 +40,7 @@ def notify_listing(relative_url):
     listing_detail_page = requests.get(absolute_url)
     soup = BeautifulSoup(listing_detail_page.content, 'html.parser')
 
-    page_header = soup.find("div", {"class": "css-kxziuu"}).contents[0]
+    page_header = soup.find("h1", {"class": "css-kxziuu"}).contents[0]
     logging.info('Page header ' + page_header)
 
     cursor = db_connection.cursor()
