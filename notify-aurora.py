@@ -3,22 +3,20 @@ import logging
 import os
 
 import requests
-from twilio.rest import Client
 
 logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
 separator = "##"
 
 
-def notify_twilio(notification_text):
-    client = Client(os.environ['TWILIO_ACCOUNT_SID'], os.environ['TWILIO_AUTH_TOKEN'])
+def notify_map_share(notification_text):
+    headers = {'User-Agent': 'Mozilla/5.0'}
+    payload = {'deviceIds': '146527', 'fromAddr': os.environ['SENDER_NUMBER'], 'messageText': notification_text}
 
-    message = client.messages.create(
-        body=notification_text,
-        from_=os.environ['SENDER_NUMBER'],
-        to=os.environ['RECIPIENT_NUMBER']
-    )
-
-    logging.info('sent ' + message.sid)
+    session = requests.Session()
+    session.post(
+        'https://share.garmin.com/' + os.environ['MAP_SHARE_ID'] +'/Map/SendMessageToDevices',
+        headers=headers,
+        data=payload)
 
 
 def get_aurora_forecast():
@@ -40,4 +38,4 @@ def get_aurora_forecast():
     return '-'.join(kp_days)
 
 
-notify_twilio(get_aurora_forecast())
+notify_map_share(get_aurora_forecast())
