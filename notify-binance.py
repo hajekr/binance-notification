@@ -13,7 +13,8 @@ db_connection = psycopg2.connect(os.environ.get("DATABASE_URL"))
 
 def create_table_if_not_exists():
     cursor = db_connection.cursor()
-    cursor.execute('CREATE TABLE IF NOT EXISTS listings(id SERIAL PRIMARY KEY, url CHAR(255) NOT NULL, title CHAR(255) NOT NULL);')
+    cursor.execute(
+        'CREATE TABLE IF NOT EXISTS listings(id SERIAL PRIMARY KEY, url CHAR(255) NOT NULL, title CHAR(255) NOT NULL);')
     logging.info('Table created successfully')
     db_connection.commit()
 
@@ -33,6 +34,13 @@ def notify_slack(notification_text):
         logging.error(e)
 
 
+def is_allowed(page_header):
+    if 'Trading Pairs' not in page_header and 'Isolated Margin' not in page_header and 'Futures' not in page_header:
+        return True
+    else:
+        return False
+
+
 def notify_listing(relative_url):
     absolute_url = 'https://www.binance.com' + relative_url;
     logging.info('Page url ' + absolute_url)
@@ -48,14 +56,16 @@ def notify_listing(relative_url):
     data = cursor.fetchall()
 
     if len(data) == 0:
-        message = '*' + page_header + '* \n' + absolute_url
-
-        logging.info('Action: NOTIFY')
-        notify_slack(message)
+        if is_allowed(page_header):
+            logging.info('Action: NOTIFY')
+            message = '*' + page_header + '* \n' + absolute_url
+            notify_slack(message)
+        else:
+            logging.info('Action: SKIP - content not allowed')
 
         cursor.execute('INSERT INTO listings(url, title) VALUES (\'' + absolute_url + '\',\'' + page_header + '\')')
     else:
-        logging.info('Action: SKIP')
+        logging.info('Action: SKIP - already notified')
 
     db_connection.commit()
     logging.info(' --- ')
