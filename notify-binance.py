@@ -34,11 +34,8 @@ def notify_slack(notification_text):
         logging.error(e)
 
 
-def is_allowed(page_header):
-    if 'Trading Pairs' not in page_header and 'Isolated Margin' not in page_header and 'Futures' not in page_header:
-        return True
-    else:
-        return False
+def is_allowed(text):
+    return not ('Trading Pairs' in text or 'Isolated Margin' in text or 'Futures' in text)
 
 
 def notify_listing(relative_url):
