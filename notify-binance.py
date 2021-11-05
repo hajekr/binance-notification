@@ -39,7 +39,7 @@ def is_allowed(text):
 
 
 def notify_listing(relative_url):
-    absolute_url = 'https://www.binance.com' + relative_url;
+    absolute_url = 'https://www.binance.com' + relative_url.strip();
     logging.info('Page url ' + absolute_url)
 
     listing_detail_page = requests.get(absolute_url)
@@ -49,7 +49,7 @@ def notify_listing(relative_url):
     logging.info('Page header ' + page_header)
 
     cursor = db_connection.cursor()
-    cursor.execute('SELECT url FROM listings WHERE url ilike \'' + absolute_url + '\'')
+    cursor.execute('SELECT url FROM listings WHERE url like trim(\'' + absolute_url + '\')')
     data = cursor.fetchall()
 
     if len(data) == 0:
@@ -60,7 +60,7 @@ def notify_listing(relative_url):
         else:
             logging.info('Action: SKIP - content not allowed')
 
-        cursor.execute('INSERT INTO listings(url, title) VALUES (\'' + absolute_url + '\',\'' + page_header + '\')')
+        cursor.execute('INSERT INTO listings(url, title) VALUES (trim(\'' + absolute_url + '\'),trim(\'' + page_header + '\'))')
     else:
         logging.info('Action: SKIP - already notified')
 
