@@ -49,7 +49,7 @@ def notify_listing(relative_url):
     logging.info('Page header ' + page_header)
 
     cursor = db_connection.cursor()
-    cursor.execute('SELECT url FROM listings WHERE url = \'' + absolute_url + '\'')
+    cursor.execute('SELECT url FROM listings WHERE url ilike \'' + absolute_url + '\'')
     data = cursor.fetchall()
 
     if len(data) == 0:
