@@ -26,7 +26,9 @@ def notify_slack(notification_text):
     try:
         result = client.chat_postMessage(
             channel=channel_id,
-            text=notification_text
+            text=notification_text,
+            unfurl_links=False,
+            unfurl_media=False
         )
         logging.info(result)
 
