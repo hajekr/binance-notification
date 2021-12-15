@@ -3,7 +3,6 @@ import os
 
 import psycopg2
 import requests
-from bs4 import BeautifulSoup
 from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
 
@@ -40,29 +39,25 @@ def is_allowed(text):
     return not ('Trading Pairs' in text or 'Isolated Margin' in text or 'Futures' in text)
 
 
-def notify_listing(relative_url):
-    absolute_url = 'https://www.binance.com' + relative_url.strip();
+def notify_listing(code, title):
+    absolute_url = 'https://www.binance.com/en/support/announcement/' + code
     logging.info('Page url ' + absolute_url)
-
-    listing_detail_page = requests.get(absolute_url)
-    soup = BeautifulSoup(listing_detail_page.content, 'html.parser')
-
-    page_header = soup.find("h1", {"class": "css-kxziuu"}).contents[0]
-    logging.info('Page header ' + page_header)
+    logging.info('Page title ' + title)
 
     cursor = db_connection.cursor()
     cursor.execute('SELECT url FROM listings WHERE url like trim(\'' + absolute_url + '\')')
     data = cursor.fetchall()
 
     if len(data) == 0:
-        if is_allowed(page_header):
+        if is_allowed(title):
             logging.info('Action: NOTIFY')
-            message = '*' + page_header + '* \n' + absolute_url
+            message = '*' + title + '* \n' + absolute_url
             notify_slack(message)
         else:
             logging.info('Action: SKIP - content not allowed')
 
-        cursor.execute('INSERT INTO listings(url, title) VALUES (trim(\'' + absolute_url + '\'),trim(\'' + page_header + '\'))')
+        cursor.execute(
+            'INSERT INTO listings(url, title) VALUES (trim(\'' + absolute_url + '\'),trim(\'' + title + '\'))')
     else:
         logging.info('Action: SKIP - already notified')
 
@@ -71,13 +66,12 @@ def notify_listing(relative_url):
 
 
 def notify_new_listings():
-    page = requests.get('https://www.binance.com/en/support/announcement/c-48?navId=48')
-    soup = BeautifulSoup(page.content, 'html.parser')
+    query = {'type': '1', 'pageNo': '1', 'pageSize': '5', 'catalogId': '48'}
+    response = requests.get('https://www.binance.com/bapi/composite/v1/public/cms/article/list/query', params=query)
+    articles = response.json().get('data').get('catalogs')[0].get('articles')
 
-    # find links by class of all links in "New Crypto Listings" section
-    new_listings = soup.find_all("a", {"class": "css-1ej4hfo"})
-    for listing in new_listings:
-        notify_listing(listing['href'])
+    for article in articles:
+        notify_listing(article.get('code'), article.get('title'))
 
 
 create_table_if_not_exists()
