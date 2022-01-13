@@ -39,6 +39,13 @@ def is_allowed(text):
     return not ('Trading Pairs' in text or 'Isolated Margin' in text or 'Futures' in text)
 
 
+def get_prefix(title):
+    if 'Launchpad' in title or 'Launchpool' in title:
+        return ':vibe: :rocket: '
+    else:
+        return ''
+
+
 def notify_listing(code, title):
     absolute_url = 'https://www.binance.com/en/support/announcement/' + code
     logging.info('Page url ' + absolute_url)
@@ -51,7 +58,7 @@ def notify_listing(code, title):
     if len(data) == 0:
         if is_allowed(title):
             logging.info('Action: NOTIFY')
-            message = '*' + title + '* \n' + absolute_url
+            message = get_prefix(title) + '*' + title + '* \n' + absolute_url
             notify_slack(message)
         else:
             logging.info('Action: SKIP - content not allowed')
