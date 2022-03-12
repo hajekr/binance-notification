@@ -56,8 +56,8 @@ def notify_map_share(garmin_url):
 
 with MailBox(os.environ['AURORA_IMAP_URL']).login(
         os.environ['AURORA_IMAP_LOGIN'],
-        os.environ['AURORA_IMAP_PASSWORD'], 'INBOX') as mailbox:
-    # get unseen emails from INBOX folder
+        os.environ['AURORA_IMAP_PASSWORD'],
+        'INBOX') as mailbox:
     for msg in mailbox.fetch(AND(from_=os.environ['AURORA_IMAP_FROM'], new=True)):
         urls = URLExtract().find_urls(msg.text)
         logging.info(urls)
