@@ -3,4 +3,5 @@ requests
 bs4
 pytz
 psycopg2
-twilio
+imap_tools
+urlextract
