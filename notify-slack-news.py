@@ -16,14 +16,14 @@ database_url = 'postgresql://' \
 
 
 def create_table_if_not_exists():
-    db_connection = psycopg2.connect(database_url)
-
     db_connection.cursor().execute(
-        'CREATE TABLE IF NOT EXISTS listings(id SERIAL PRIMARY KEY, url CHAR(255) NOT NULL, title CHAR(255) NOT NULL);')
+        'CREATE TABLE IF NOT EXISTS listings('
+        'id SERIAL PRIMARY KEY, '
+        'url VARCHAR(125) NOT NULL, '
+        'title VARCHAR(255) NOT NULL);')
     logging.info('Table created successfully')
 
     db_connection.commit()
-    db_connection.close()
 
 
 def notify_slack(notification_text):
@@ -59,9 +59,8 @@ def notify_listing(code, title):
     logging.info('Page url ' + absolute_url)
     logging.info('Page title ' + title)
 
-    db_connection = psycopg2.connect(database_url)
     cursor = db_connection.cursor()
-    cursor.execute('SELECT url FROM listings WHERE url like trim(\'' + absolute_url + '\')')
+    cursor.execute('SELECT url FROM listings WHERE url like \'' + absolute_url.strip() + '\'')
     data = cursor.fetchall()
 
     if len(data) == 0:
@@ -73,12 +72,11 @@ def notify_listing(code, title):
             logging.info('Action: SKIP - content not allowed')
 
         cursor.execute(
-            'INSERT INTO listings(url, title) VALUES (trim(\'' + absolute_url + '\'),trim(\'' + title + '\'))')
+            'INSERT INTO listings(url, title) VALUES (\'' + absolute_url.strip() + '\',\'' + title.strip() + '\')')
+
     else:
         logging.info('Action: SKIP - already notified')
 
-    db_connection.commit()
-    db_connection.close()
     logging.info(' --- ')
 
 
@@ -91,8 +89,15 @@ def notify_new_listings():
         notify_listing(article.get('code'), article.get('title'))
 
 
-create_table_if_not_exists()
+try:
+    db_connection = psycopg2.connect(database_url)
+    db_connection.autocommit = True
 
-while True:
-    notify_new_listings()
-    time.sleep(10)
+    create_table_if_not_exists()
+
+    while True:
+        notify_new_listings()
+        time.sleep(20)
+finally:
+    if db_connection is not None:
+        db_connection.close()

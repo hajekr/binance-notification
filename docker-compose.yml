@@ -14,6 +14,8 @@ services:
   app:
     image: registry.gitlab.com/hajekr/binance-notification:latest
     restart: always
+    depends_on:
+      - "db"
     environment:
       DB_HOST: ${DB_HOST:-db}
       DB_USER: ${DB_USER:-binance-notification}
