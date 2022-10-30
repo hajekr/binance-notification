@@ -1,5 +1,6 @@
 import logging
 import os
+import time
 
 import psycopg2
 import requests
@@ -7,15 +8,21 @@ from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
 
 logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
-db_connection = psycopg2.connect(os.environ.get("DATABASE_URL"))
+database_url = 'postgresql://' \
+               + os.environ.get("DB_USER") + ':' \
+               + os.environ.get("DB_PASSWORD") + '@' \
+               + os.environ.get("DB_HOST")
 
 
 def create_table_if_not_exists():
-    cursor = db_connection.cursor()
-    cursor.execute(
+    db_connection = psycopg2.connect(database_url)
+
+    db_connection.cursor().execute(
         'CREATE TABLE IF NOT EXISTS listings(id SERIAL PRIMARY KEY, url CHAR(255) NOT NULL, title CHAR(255) NOT NULL);')
     logging.info('Table created successfully')
+
     db_connection.commit()
+    db_connection.close()
 
 
 def notify_slack(notification_text):
@@ -51,6 +58,7 @@ def notify_listing(code, title):
     logging.info('Page url ' + absolute_url)
     logging.info('Page title ' + title)
 
+    db_connection = psycopg2.connect(database_url)
     cursor = db_connection.cursor()
     cursor.execute('SELECT url FROM listings WHERE url like trim(\'' + absolute_url + '\')')
     data = cursor.fetchall()
@@ -69,6 +77,7 @@ def notify_listing(code, title):
         logging.info('Action: SKIP - already notified')
 
     db_connection.commit()
+    db_connection.close()
     logging.info(' --- ')
 
 
@@ -82,6 +91,7 @@ def notify_new_listings():
 
 
 create_table_if_not_exists()
-notify_new_listings()
 
-db_connection.close()
+while True:
+    notify_new_listings()
+    time.sleep(10)

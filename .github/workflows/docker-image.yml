@@ -1,0 +1,28 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Login to GitLab Container Registry
+      uses: docker/login-action@v2
+      with:
+        registry: registry.gitlab.com
+        username: ${{ secrets.GITLAB_USERNAME }}
+        password: ${{ secrets.GITLAB_TOKEN }}
+
+    - name: Build and push
+      uses: docker/build-push-action@v3
+      with:
+        push: true
+        platforms: linux/arm64/v8
+        tags: registry.gitlab.com/hajekr/binance-notification:latest
