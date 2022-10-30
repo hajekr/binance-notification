@@ -24,5 +24,6 @@ jobs:
       uses: docker/build-push-action@v3
       with:
         push: true
+        no-cache: true
         platforms: linux/arm64/v8
         tags: registry.gitlab.com/hajekr/binance-notification:latest
