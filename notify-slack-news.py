@@ -11,7 +11,8 @@ logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
 database_url = 'postgresql://' \
                + os.environ.get("DB_USER") + ':' \
                + os.environ.get("DB_PASSWORD") + '@' \
-               + os.environ.get("DB_HOST")
+               + os.environ.get("DB_HOST") + '/' \
+               + os.environ.get("DB_NAME")
 
 
 def create_table_if_not_exists():
