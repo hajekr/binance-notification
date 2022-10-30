@@ -11,5 +11,14 @@ services:
     environment:
       POSTGRES_USER: ${DB_USER:-binance-notification}
       POSTGRES_PASSWORD: ${DB_PASSWORD:-password}
+  app:
+    image: registry.gitlab.com/hajekr/binance-notification:latest
+    restart: always
+    environment:
+      DB_HOST: ${DB_HOST:-db}
+      DB_USER: ${DB_USER:-binance-notification}
+      DB_PASSWORD: ${DB_PASSWORD:-password}
+      SLACK_TOKEN: ${SLACK_TOKEN:-***}
+      SLACK_CHANNEL_ID: ${SLACK_CHANNEL_ID:-***}
 volumes:
   data:

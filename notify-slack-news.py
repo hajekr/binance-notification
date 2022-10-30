@@ -26,8 +26,8 @@ def create_table_if_not_exists():
 
 
 def notify_slack(notification_text):
-    client = WebClient(token=os.environ.get("SLACK_BOT_TOKEN"))
-    channel_id = os.environ.get("CHANNEL_ID")
+    client = WebClient(token=os.environ.get("SLACK_TOKEN"))
+    channel_id = os.environ.get("SLACK_CHANNEL_ID")
 
     try:
         result = client.chat_postMessage(

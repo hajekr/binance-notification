@@ -1,1 +1,1 @@
-# slack-bots
+# binance-notification
