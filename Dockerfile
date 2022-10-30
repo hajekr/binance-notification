@@ -1,4 +1,4 @@
-FROM python:3-alpine
+FROM arm64v8/python:3
 
 ENV DB_HOST db
 ENV DB_USER binance-notification
