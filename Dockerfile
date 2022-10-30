@@ -1,4 +1,4 @@
-FROM python:3-bullseye
+FROM python:3-alpine
 
 ENV DB_HOST db
 ENV DB_USER binance-notification
