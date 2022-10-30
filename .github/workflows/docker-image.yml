@@ -25,5 +25,5 @@ jobs:
       with:
         push: true
         no-cache: true
-        platforms: arm64v8
+        platforms: linux/arm64
         tags: registry.gitlab.com/hajekr/binance-notification:latest
