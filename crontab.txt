@@ -1,0 +1,2 @@
+* * * * * cd /src && /usr/local/bin/python3 notify-slack-news.py >> cron.log 2>&1
+# Empty line

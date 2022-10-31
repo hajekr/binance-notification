@@ -1,13 +1,13 @@
 import logging
 import os
-import time
+import sys
 
 import psycopg2
 import requests
 from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
 
-logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
+logging.basicConfig(stream=sys.stdout, format='%(levelname)s:%(message)s', level=logging.INFO)
 database_url = 'postgresql://' \
                + os.environ.get("DB_USER") + ':' \
                + os.environ.get("DB_PASSWORD") + '@' \
@@ -22,8 +22,6 @@ def create_table_if_not_exists():
         'url VARCHAR(125) NOT NULL, '
         'title VARCHAR(255) NOT NULL);')
     logging.info('Table created successfully')
-
-    db_connection.commit()
 
 
 def notify_slack(notification_text):
@@ -89,15 +87,10 @@ def notify_new_listings():
         notify_listing(article.get('code'), article.get('title'))
 
 
-try:
-    db_connection = psycopg2.connect(database_url)
-    db_connection.autocommit = True
+db_connection = psycopg2.connect(database_url)
+db_connection.autocommit = True
 
-    create_table_if_not_exists()
+create_table_if_not_exists()
+notify_new_listings()
 
-    while True:
-        notify_new_listings()
-        time.sleep(20)
-finally:
-    if db_connection is not None:
-        db_connection.close()
+db_connection.close()
