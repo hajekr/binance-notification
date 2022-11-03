@@ -16,9 +16,8 @@ jobs:
       - name: Login to GitLab Container Registry
         uses: docker/login-action@v2
         with:
-          registry: registry.gitlab.com
-          username: ${{ secrets.GITLAB_USERNAME }}
-          password: ${{ secrets.GITLAB_TOKEN }}
+          username: ${{ secrets.DOCKER_LOGIN }}
+          password: ${{ secrets.DOCKER_TOKEN }}
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
@@ -32,4 +31,4 @@ jobs:
           push: true
           no-cache: true
           platforms: linux/arm64/v8,linux/amd64
-          tags: registry.gitlab.com/hajekr/binance-notification:latest
+          tags: romanhajek/binance-notification:latest

@@ -12,7 +12,7 @@ services:
       POSTGRES_USER: ${DB_USER:-binance-notification}
       POSTGRES_PASSWORD: ${DB_PASSWORD:-password}
   app:
-    image: registry.gitlab.com/hajekr/binance-notification:latest
+    image: romanhajek/binance-notification:latest
     restart: always
     depends_on:
       - "db"
