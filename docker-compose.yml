@@ -7,7 +7,7 @@ services:
     volumes:
       - data:/var/lib/postgresql/data
     ports:
-      - "6432:5432"
+      - "7432:5432"
     environment:
       POSTGRES_USER: ${DB_USER:-binance-notification}
       POSTGRES_PASSWORD: ${DB_PASSWORD:-password}
