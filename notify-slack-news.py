@@ -41,7 +41,10 @@ def notify_slack(notification_text):
 
 
 def is_allowed(text):
-    return not ('Trading Pairs' in text or 'Isolated Margin' in text or 'Futures' in text)
+    return not ('Trading Pairs' in text
+                or 'Isolated Margin' in text
+                or 'Futures' in text
+                or 'Binance Margin' in text)
 
 
 def get_prefix(title):
