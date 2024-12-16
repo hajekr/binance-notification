@@ -1,6 +1,7 @@
 import logging
 import os
 import sys
+
 import psycopg2
 import requests
 from slack_sdk import WebClient
@@ -60,7 +61,10 @@ def notify_listing(code, title):
     logging.info('Page title ' + title)
 
     cursor = db_connection.cursor()
-    cursor.execute('SELECT url FROM listings WHERE url like \'' + absolute_url.strip() + '\'')
+    cursor.execute(
+        'SELECT url FROM listings WHERE url like %s',
+        (absolute_url.strip(),))
+
     data = cursor.fetchall()
 
     if len(data) == 0:
@@ -72,7 +76,8 @@ def notify_listing(code, title):
             logging.info('Action: SKIP - content not allowed')
 
         cursor.execute(
-            'INSERT INTO listings(url, title) VALUES (\'' + absolute_url.strip() + '\',\'' + title.strip() + '\')')
+            'INSERT INTO listings(url, title) VALUES (%s, %s)',
+            (absolute_url.strip(), title.strip()))
 
     else:
         logging.info('Action: SKIP - already notified')
