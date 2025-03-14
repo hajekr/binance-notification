@@ -86,8 +86,8 @@ def notify_listing(code, title):
 
 
 def notify_new_listings():
-    query = {'type': '1', 'pageNo': '1', 'pageSize': '5', 'catalogId': '48'}
-    response = requests.get('https://www.binance.com/bapi/composite/v1/public/cms/article/list/query', params=query)
+    query = {'type': '1', 'pageNo': '1', 'pageSize': '10', 'catalogId': '48'}
+    response = requests.get('https://www.binance.com/bapi/apex/v1/public/apex/cms/article/list/query', params=query)
     articles = response.json().get('data').get('catalogs')[0].get('articles')
 
     for article in articles:
